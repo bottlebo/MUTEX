@@ -47,7 +47,7 @@ await mutex.runExclusive(async () => {
 });
 ```
 
-### Checking whether the mutex is locked
+#### Checking whether the mutex is locked
 
 ```javascript
 mutex.isLocked();
