@@ -4,33 +4,11 @@
     const mutex = new Mutex();
 ```
 
-#### Locking
+#### runExclusive
 
 ```javascript
   mutex
-    .acquire()
-    .then(function(release) {
-        // ...
-    });
-
-```
-##### Async function example
-
-```javascript
-const release = await mutex.acquire();
-try {
-    const i = await store.get();
-    await store.put(i + 1);
-} finally {
-    release();
-}
-```
-
-#### Synchronized code execution
-
-```javascript
-  mutex
-    .runExclusive(function() {
+    .runExclusive([key1,key2,...], function() {
         // ...
     })
     .then(function(result) {
@@ -41,14 +19,37 @@ try {
 ##### Async function example
 
 ```javascript
-await mutex.runExclusive(async () => {
+await mutex.runExclusive([key1,key2,...], async () => {
     const i = await store.get();
     await store.put(i + 1);
 });
 ```
 
+#### Callback example
+
+```javascript
+  mutex
+    .acquire([key1,key2,...])
+    .then(function(lock) {
+        // ...
+        mutex.release(lock);
+    });
+
+```
+#### Async example
+
+```javascript
+const lock = await mutex.acquire([key1,key2,...]);
+try {
+    const i = await store.get();
+    await store.put(i + 1);
+} finally {
+    mutex.release(lock);
+}
+```
+
 #### Checking whether the mutex is locked
 
 ```javascript
-mutex.isLocked();
+mutex.isLocked(key);
 ```
