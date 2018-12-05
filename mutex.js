@@ -1,49 +1,71 @@
 class Mutex {
   constructor() {
-    this._locked = false;
+    this._locked = [];
     this._queue = [];
   }
-  get isLocked() {
-    return this._locked;
+  isLocked(key) {
+    return this._locked[key];
   }
-  acquire() {
-    const ticket = new Promise(resolve => this._queue.push(resolve));
-    if (!this._locked) {
-      this._dispatchNext();
+  acquire(keys) {
+    let _keys = [];
+    let _promises = [];
+    if (Array.isArray(keys)) {
+      _keys = keys;
     }
-
-    return ticket;
+    else {
+      _keys.push(keys);
+    }
+    for (let key of _keys) {
+      if (!this._queue[key])
+        this._queue[key] = [];
+      //const ticket = 
+      _promises.push(new Promise(resolve => this._queue[key].push(resolve)));
+      if (!this._locked[key]) {
+        this._dispatchNext(key);
+      }
+    }
+    return Promise.all(_promises);
+    //ticket;
   }
-  runExclusive(callback) {
+  runExclusive(key, callback) {
     return this
-      .acquire()
-      .then(release => {
+      .acquire(key)
+      .then(async (release) => {
         let result;
-
         try {
-          result = callback();
+          result = await callback();
         } catch (e) {
-          release();
+          //release();
+          this.release(release)
           throw (e);
         }
-
+        // console.log('===')
+        // console.log(callback)
+        // console.log(release)
         return Promise
           .resolve(result)
-          .then((x) => (release(), x),
-            e => {release(); throw e;}
+          .then((x) => (/* release() */this.release(release), x),
+            e => {/* release() */this.release(release); throw e;}
           );
       });
   }
-
-  _dispatchNext() {
-    if (this._queue.length > 0) {
-      this._locked = true;
-      const resolve = this._queue.shift();
+  release(releases) {
+    let r = [];
+    if (Array.isArray(releases)) r = releases;
+    else r.push(releases);
+    for (let f of r) {
+      f();
+    }
+  }
+  _dispatchNext(key) {
+    if (this._queue[key].length > 0) {
+      this._locked[key] = true;
+      const resolve = this._queue[key].shift();
       if (resolve) {
-        resolve(this._dispatchNext.bind(this));
+        resolve(this._dispatchNext.bind(this, key));
       }
     } else {
-      this._locked = false;
+      this._locked[key] = false;
     }
   }
 }
