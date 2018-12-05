@@ -6,8 +6,7 @@ function sleep(ms) {
 }
 describe('Mutex tests', () => {
 
-
-  it('ownership is exclusive', function(done) {
+  it('callback #1', function(done) {
     const mutex = new Mutex();
     let flag = false;
 
@@ -27,7 +26,7 @@ describe('Mutex tests', () => {
       });
   });
 
-  it('ownership is exclusive', function(done) {
+  it('callback #2', function(done) {
     const mutex = new Mutex();
     let flag = false;
 
@@ -46,7 +45,30 @@ describe('Mutex tests', () => {
         done();
       });
   });
-  it('ownership is exclusive', function(done) {
+
+  
+  it('callback #3', function(done) {
+    const mutex = new Mutex();
+    let flag = false;
+
+    mutex
+      .acquire(['1','3'])
+      .then(release => setTimeout(() => {
+        flag = true;
+        mutex.release(release);
+      }, 100));
+
+    mutex
+      .acquire(['2','4'])
+      .then((release) => {
+        mutex.release(release);
+        assert.isFalse(flag);
+        done();
+      });
+  });
+
+
+  it('callback #4', function(done) {
     const mutex = new Mutex();
     let flag = 0;
 
@@ -73,7 +95,7 @@ describe('Mutex tests', () => {
       });
   });
 
-  it('ownership is exclusive', function(done) {
+  it('callback #5', function(done) {
     const mutex = new Mutex();
     let flag = 0;
 
@@ -101,7 +123,7 @@ describe('Mutex tests', () => {
       });
   });
 
-  it('ownership is exclusive 0', function(done) {
+  it('callback #5', function(done) {
     const mutex = new Mutex();
     let flag = 0;
 
@@ -168,7 +190,7 @@ describe('Mutex tests', () => {
       );
   });
 
-  it('runExclusive is exclusive 1', function(done) {
+  it('runExclusive #1', function(done) {
     const mutex = new Mutex();
     let flag = false;
 
@@ -178,7 +200,7 @@ describe('Mutex tests', () => {
       .runExclusive([1], async () => {assert.isFalse(flag); done()});
   });
 
-  it('runExclusive is exclusive 1', function(done) {
+  it('runExclusive #2', function(done) {
     const mutex = new Mutex();
     let flag = false;
 
@@ -191,7 +213,7 @@ describe('Mutex tests', () => {
       .runExclusive([1], async () => {assert.isFalse(flag); done()});
   });
 
-  it('runExclusive is exclusive 2', function(done) {
+  it('runExclusive #3', function(done) {
     const mutex = new Mutex();
     let flag = 0;
     mutex
@@ -206,7 +228,7 @@ describe('Mutex tests', () => {
       .runExclusive([2, 1], async () => {assert.equal(flag, 2); done();});
   });
 
-  it('runExclusive is exclusive 2', function(done) {
+  it('runExclusive #4', function(done) {
     const mutex = new Mutex();
     let flag = 0;
     mutex
@@ -217,7 +239,27 @@ describe('Mutex tests', () => {
       .runExclusive([1, 2], async () => {assert.equal(flag, 2); done();});
   });
 
-  it('runExclusive is exclusive 2', function(done) {
+  it('runExclusive #5', function(done) {
+    const mutex = new Mutex();
+    let flag = false;
+    mutex
+      .runExclusive([1, 2], async () => {await sleep(50); flag=true;});
+   
+    mutex
+      .runExclusive([3, 4], async () => {assert.isFalse(flag); done();});
+  });
+
+  
+  it('runExclusive #6', function(done) {
+    const mutex = new Mutex();
+    let flag = false;
+    mutex
+      .runExclusive([1, 2], async () => {await sleep(50); flag=true;});
+   
+    mutex
+      .runExclusive([1, 4], async () => {assert.isTrue(flag); done();});
+  });
+  it('runExclusive #7', function(done) {
     const mutex = new Mutex();
     let flag = 0;
     mutex
@@ -242,7 +284,7 @@ describe('Mutex tests', () => {
     mutex.runExclusive(1, () => {assert.isTrue(flag)});
   });
 
-  it('isLocked reflects the mutex state', async () => {
+  it('await/release #1', async () => {
     const mutex = new Mutex();
     let flag = 0;
     const lock_1 = mutex.acquire([1]);
@@ -263,9 +305,6 @@ describe('Mutex tests', () => {
     await sleep(50);
     assert.equal(flag,2);
     mutex.release(releas_3);
-
-
-
   });
 
   it('isLocked reflects the mutex state', async () => {
