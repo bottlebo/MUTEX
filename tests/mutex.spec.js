@@ -5,7 +5,30 @@ function sleep(ms) {
   return new Promise((resolve, reject) => setTimeout(resolve, ms))
 }
 describe('Mutex tests', () => {
+  it('callback #1', function(done) {
+    const mutex = new Mutex();
+    let flag = false;
 
+    const m = mutex
+      .acquire('1')
+      .then(release => setTimeout(() => {
+        flag = true;
+        console.log('release')
+        mutex.release(release);
+        //done();
+      }, 50))
+      .catch((e) => console.log(e))
+      ;
+//console.log(m)
+    mutex
+      .acquire('1')
+      .then((release) => {
+        mutex.release(release);
+        assert.isTrue(flag);
+        done();
+      });
+  });
+/*
   it('callback #1', function(done) {
     const mutex = new Mutex();
     let flag = false;
@@ -330,5 +353,5 @@ describe('Mutex tests', () => {
     assert.isFalse(mutex.isLocked(2));
 
   });
-
+*/
 });

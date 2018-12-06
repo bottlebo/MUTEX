@@ -2,6 +2,10 @@ class Mutex {
   constructor() {
     this._locked = [];
     this._queue = [];
+    this._allPromises = null;
+    this._timeOutPromise = null;
+    this.r = null
+    this.releases = [];
   }
   isLocked(key) {
     return this._locked[key];
@@ -24,8 +28,24 @@ class Mutex {
         this._dispatchNext(key);
       }
     }
-    return Promise.all(_promises);
+    // this._timeOutPromise = new Promise((resolve, reject) => {
+    //   setTimeout(this._timeOut.bind(this, resolve, reject), 50)
+    // }
+    // )
+    //_promises.push(this._timeOutPromise);
+//console.log(this._queue)
+    this._allPromises = Promise.all(_promises)
+    .then((releases)=>{this.releases = releases});//.map(p => p.catch(() => undefined)));
+
+    return this._allPromises
+    //new Promise((resolve, reject) => {this.r = resolve});//Promise.race([this._allPromises, this._timeOutPromise]);
     //ticket;
+  }
+  _timeOut(resolve, reject) {
+    //console.log(this._timeOutPromise);
+    console.log('---')
+    reject('*mutex timed out');
+    throw new Error('mutex timed out')
   }
   runExclusive(key, callback) {
     return this
@@ -49,7 +69,9 @@ class Mutex {
           );
       });
   }
-  release(releases) {
+  release(_releases) {
+    const releases = this.releases;
+    console.log(releases)
     let r = [];
     if (Array.isArray(releases)) r = releases;
     else r.push(releases);
