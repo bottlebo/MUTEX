@@ -18,14 +18,12 @@ class Mutex {
     for (let key of _keys) {
       if (!this._queue[key])
         this._queue[key] = [];
-      //const ticket = 
       _promises.push(new Promise(resolve => this._queue[key].push(resolve)));
       if (!this._locked[key]) {
         this._dispatchNext(key);
       }
     }
     return Promise.all(_promises);
-    //ticket;
   }
   runExclusive(key, callback) {
     return this
@@ -39,13 +37,10 @@ class Mutex {
           this.release(release)
           throw (e);
         }
-        // console.log('===')
-        // console.log(callback)
-        // console.log(release)
         return Promise
           .resolve(result)
-          .then((x) => (/* release() */this.release(release), x),
-            e => {/* release() */this.release(release); throw e;}
+          .then((x) => (this.release(release), x),
+            e => {this.release(release); throw e;}
           );
       });
   }
