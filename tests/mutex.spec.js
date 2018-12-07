@@ -6,9 +6,6 @@ function sleep(ms) {
 }
 describe('Mutex tests', () => {
 
-
-
-
   it('callback #1', function(done) {
     const mutex = new Mutex();
     let flag = false;
@@ -262,6 +259,7 @@ describe('Mutex tests', () => {
     mutex
       .runExclusive([1, 4], async () => {assert.isTrue(flag); done();});
   });
+
   it('runExclusive #7', function(done) {
     const mutex = new Mutex();
     let flag = 0;
@@ -328,7 +326,7 @@ describe('Mutex tests', () => {
 
     assert.isTrue(mutex.isLocked(2));
 
-    mutex.release(releas_2)
+    mutex.release(releas_2);
     assert.isFalse(mutex.isLocked(1));
     assert.isFalse(mutex.isLocked(2));
 
