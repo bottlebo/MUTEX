@@ -4,15 +4,13 @@ class Mutex {
     this._options = options || {};
     this._locked = [];
     this._queue = [];
-    this._allPromises = null;
     this._timeOutPromise = null;
-    this._cancelToken = new CancelToken()
-    this._promises = [];
+    this._cancelToken = new CancelToken();
 
     if (this._options.timeOut)
       this._timeOutPromise = new Promise((resolve, reject) => {
         setTimeout(
-          () => {console.log('cancel');this._cancelToken.cancel()}, this._options.timeOut)
+          () => this._cancelToken.cancel(), this._options.timeOut)
       })
 
   }
@@ -32,25 +30,12 @@ class Mutex {
       if (!this._queue[key]) {
         this._queue[key] = [];
       }
-      //const ticket = 
-      _promises.push(
-          cancellablePromise(new Promise((resolve, reject) => {this._queue[key].push(resolve)}), this._cancelToken)
-      // //     /* setTimeout(()=>{reject('time out*'), console.log('timer')},this._options.timeOut) */ }), this._cancelToken)
-       );
-      //_promises.push(new Promise((resolve, reject) => {this._queue[key].push(resolve)}))
-      // _promises.push(Promise.race([
-      //   new Promise((resolve, reject) => {this._queue[key].push(resolve)}),
-      //   new Promise((resolve,reject) =>setTimeout(()=>{reject('time out*'), console.log('timer')},this._options.timeOut))
-      // ]));
+      _promises.push(new Promise(resolve => this._queue[key].push(resolve)));
       if (!this._locked[key]) {
         this._dispatchNext(key);
       }
     }
-
-    let _allPromises = Promise.all(_promises)//, this._cancelToken);
-
-
-    return _allPromises;
+    return Promise.all(_promises)
   }
 
   runExclusive(key, callback) {

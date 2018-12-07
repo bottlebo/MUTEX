@@ -53,3 +53,19 @@ try {
 ```javascript
 mutex.isLocked(key);
 ```
+
+#### TimeOut example
+
+```javascript
+const mutex = new Mutex({timeOut: 160});
+
+ mutex
+.runExclusive([1], async () => {
+await sleep(50);
+//...
+})
+.then(
+() => {// ok},
+(e) => { // e.message = time our}
+);
+```
