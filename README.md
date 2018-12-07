@@ -60,12 +60,12 @@ mutex.isLocked(key);
 const mutex = new Mutex({timeOut: 160});
 
  mutex
-.runExclusive([1], async () => {
-await sleep(50);
-//...
-})
-.then(
-() => {// ok},
-(e) => { // e.message = time our}
-);
+  .runExclusive([1], async () => {
+    await sleep(50);
+    //...
+  })
+  .then(
+    (result) => {// ok},
+    (e) => { // e.message = time our}
+  );
 ```
