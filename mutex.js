@@ -1,10 +1,10 @@
 class Mutex {
   constructor() {
-    this._locked = [];
-    this._queue = [];
+    this._locked = new Map();
+    this._queue = new Map();
   }
   isLocked(key) {
-    return this._locked[key];
+    return this._locked.get(key);
   }
   acquire(keys, asyncFuncExclusive) {
     if(typeof asyncFuncExclusive === 'function')
@@ -18,10 +18,10 @@ class Mutex {
       _keys.push(keys);
     }
     for (let key of _keys) {
-      if (!this._queue[key])
-        this._queue[key] = [];
-      _promises.push(new Promise(resolve => this._queue[key].push(resolve)));
-      if (!this._locked[key]) {
+      if (!this._queue.has(key))
+        this._queue.set(key, []);
+      _promises.push(new Promise(resolve => this._queue.get(key).push(resolve)));
+      if (!this._locked.get(key)) {
         this._dispatchNext(key);
       }
     }
@@ -35,7 +35,6 @@ class Mutex {
         try {
           result = await callback();
         } catch (e) {
-          //release();
           this.release(release)
           throw (e);
         }
@@ -55,14 +54,14 @@ class Mutex {
     }
   }
   _dispatchNext(key) {
-    if (this._queue[key].length > 0) {
-      this._locked[key] = true;
-      const resolve = this._queue[key].shift();
+    if (this._queue.get(key).length > 0) {
+      this._locked.set(key, true);
+      const resolve = this._queue.get(key).shift();
       if (resolve) {
         resolve(this._dispatchNext.bind(this, key));
       }
     } else {
-      this._locked[key] = false;
+      this._locked.set(key, false);
     }
   }
 }
