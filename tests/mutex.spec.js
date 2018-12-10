@@ -5,7 +5,39 @@ function sleep(ms) {
   return new Promise((resolve, reject) => setTimeout(resolve, ms))
 }
 describe('Mutex tests', () => {
+//
+it('acquire with callback #1', function(done) {
+  const mutex = new Mutex();
+  let flag = false;
 
+  mutex
+    .acquire([2], async () => {await sleep(70); flag = true;});
+  mutex
+    .acquire([1], async () => {await sleep(50);assert.isFalse(flag); done()});
+
+    assert.isTrue(mutex.isLocked(1));
+    assert.isTrue(mutex.isLocked(2));
+  
+});
+
+it('acquire with callback #2', function(done) {
+  const mutex = new Mutex();
+  let flag = 0;
+
+  mutex
+    .acquire([2, 1], async () => {await sleep(50); flag++;});
+
+  mutex
+    .acquire([2], async () => {await sleep(50);assert.equal(flag,1); flag++;});
+  mutex
+    .acquire([1], async () => {await sleep(60);assert.equal(flag,2); done()});
+
+  assert.isTrue(mutex.isLocked(1));
+  assert.isTrue(mutex.isLocked(2));
+
+});
+
+//
   it('callback #1', function(done) {
     const mutex = new Mutex();
     let flag = false;
@@ -259,6 +291,7 @@ describe('Mutex tests', () => {
     mutex
       .runExclusive([1, 4], async () => {assert.isTrue(flag); done();});
   });
+
   it('runExclusive #7', function(done) {
     const mutex = new Mutex();
     let flag = 0;
