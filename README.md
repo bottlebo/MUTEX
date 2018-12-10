@@ -19,7 +19,15 @@
 ##### Async function example
 
 ```javascript
-await mutex.runExclusive([key1,key2,...], async () => {
+mutex.runExclusive([key1,key2,...], async () => {
+    const i = await store.get();
+    await store.put(i + 1);
+});
+```
+or
+
+```javascript
+mutex.acquire([key1,key2,...], async () => {
     const i = await store.get();
     await store.put(i + 1);
 });
