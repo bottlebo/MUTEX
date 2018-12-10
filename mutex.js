@@ -6,7 +6,9 @@ class Mutex {
   isLocked(key) {
     return this._locked[key];
   }
-  acquire(keys) {
+  acquire(keys, asyncFuncExclusive) {
+    if(typeof asyncFuncExclusive === 'function')
+      return this.runExclusive(keys, asyncFuncExclusive)
     let _keys = [];
     let _promises = [];
     if (Array.isArray(keys)) {
