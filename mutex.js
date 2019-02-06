@@ -4,10 +4,10 @@ class Mutex {
     this._queue = new Map();
   }
   isLocked(key) {
-    return this._locked.get(key);
+    return !!this._locked.get(key);
   }
   acquire(keys, asyncFuncExclusive) {
-    if(typeof asyncFuncExclusive === 'function')
+    if (typeof asyncFuncExclusive === 'function')
       return this.runExclusive(keys, asyncFuncExclusive)
     let _keys = [];
     let _promises = [];
@@ -61,7 +61,8 @@ class Mutex {
         resolve(this._dispatchNext.bind(this, key));
       }
     } else {
-      this._locked.set(key, false);
+      this._locked.delete(key);
+      this._queue.delete(key);
     }
   }
 }
