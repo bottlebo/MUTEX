@@ -51,8 +51,8 @@ describe('Mutex tests', () => {
     mutex
       .acquire([2, 1], async () => {assert.equal(flag, 2); done();});
 
-      assert.isTrue(mutex.isLocked(1));
-      assert.isTrue(mutex.isLocked(2));
+    assert.isTrue(mutex.isLocked(1));
+    assert.isTrue(mutex.isLocked(2));
   });
 
   it('runExclusive #1', function(done) {
@@ -164,18 +164,18 @@ describe('Mutex tests', () => {
       .then(value => assert.strictEqual(value, 10));
   });
 
-  it('runExclusive passes rejection', function() {
+  it('runExclusive passes rejection', function(done) {
     const mutex = new Mutex();
 
     mutex
       .runExclusive(1, () => Promise.reject('foo'))
       .then(
-        () => Promise.reject('should have been rejected'),
-        value => assert.strictEqual(value, 'foo')
+        () => done('should have been rejected'),
+        value => value === 'foo' ? done() : done('not equal')
       );
   });
 
-  it('runExclusive passes exception', function() {
+  it('runExclusive passes exception', function(done) {
     const mutex = new Mutex();
 
     mutex
@@ -183,11 +183,23 @@ describe('Mutex tests', () => {
         throw 'foo';
       })
       .then(
-        () => Promise.reject('should have been rejected'),
-        value => assert.strictEqual(value, 'foo')
+        () => done('should have been rejected'),
+        value => value === 'foo' ? done() : done('not equal')
       );
   });
+  it('runExclusive passes exception #2', async () => {
+    const mutex = new Mutex();
 
+    try {
+      await mutex.runExclusive(1, () => {
+        throw 'foo';
+      });
+    } catch (e) {
+      assert.equal(e, 'foo');
+      return;
+    }
+    throw ('Unexpected success');
+  });
   it('await/release #1', async () => {
     const mutex = new Mutex();
     let flag = 0;
